@@ -1,0 +1,6 @@
+{
+	"name" : "Dial Record",
+	"description" : "Dial a user or group with the option to record the call. Send caller somewhere if user or group can't be reached.",
+	"type" : "voice",
+	"order" : 1
+}
