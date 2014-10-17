@@ -2,5 +2,12 @@
   "name": "Recording",
   "author": "Shawn Kern",
   "description": "Applets for handeling call recording. Version 0.1",
-  "url": "https://github.com/kernworks"
+  "url": "https://github.com/kernworks",
+	"links" : [{
+		"menu" : "Call Log",
+		"url" : "recording",
+		"script" : "recording.php",
+		"label" : "Recorded Calls"
+	}]
+
 }

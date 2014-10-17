@@ -38,7 +38,7 @@ $dialer->set_state();
 if (AppletInstance::getValue('say-before-dial-action', 'no') === 'on' && $dialer->state === 'new') {
 	$say_or_play = AppletInstance::getAudioSpeechPickerValue('say-before-dial');
 	if (!AudioSpeechPickerWidget::setVerbForValue($say_or_play, $dialer->response))
-		$dialer->response->say('Please wait whel we connect your call.', array(
+		$dialer->response->say('Please wait while we connect your call.', array(
 			'voice' => $voice,
 			'language' => $language
 		));
