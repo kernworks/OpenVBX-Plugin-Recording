@@ -22,3 +22,10 @@ This works exactly the same way as the standard Dial applet with a few additiona
 1. You have the option of telling the caller something before the dial happens. This is useful for "call may be recorded" messages.
 2. You can record the dial as it is ringing or when it is answered. It is recommended that you wait until the call is answered.
 
+### Pages
+
+####Recorded Calls
+
+This page allows you to listen to calls that were recorded.
+
+Note: This is still in alpha. It does have basic functionality. It should not break your OpenVBX install.

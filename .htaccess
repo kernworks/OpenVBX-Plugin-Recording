@@ -1,0 +1,10 @@
+
+# No Indexes. Nobody needs to know what goes on in here...
+Options -Indexes
+
+# Allow some files
+<FilesMatch ".*\.(css|js|ico|gif|jpe?g|png|pdf|mp3|wav|mp4|m4a|m4p|mov|mpe?g|qt|swf)$">
+    Order Allow,Deny
+    Allow from all
+</FilesMatch>
+

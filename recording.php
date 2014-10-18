@@ -1,8 +1,34 @@
 <?php
-	$ci =& get_instance();
+//error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
+
+include_once('helpers.php');
+
+$ci =& get_instance();
 
 $service = new Services_Twilio($ci->twilio_sid, $ci->twilio_token);
 $recordings = $service->account->recordings;
+$recording_host = $ci->vbx_settings->get('recording_host', $ci->tenant->id);
+$recording_host = (strlen($recording_host) <= 0) ? 'https://api.twilio.com' : 'http://'.$recording_host;
+
+/*$plugin = OpenVBX::$currentPlugin;
+$info = $plugin->getInfo();
+$path_jquery = base_url() . implode('/', array('plugins', $info['dir_name'], 'js/jquery-1.7.1.min.js'));
+$path_js = base_url() . implode('/', array('plugins', $info['dir_name'], 'player/jquery.jplayer.min.js'));
+
+//echo '<script type="text/javascript" src="'.version_url($path_jquery).'"></script>';
+//echo '<script type="text/javascript" src="'.version_url($path_js).'"></script>';
+
+//echo '<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>'."\n";
+//echo '<script type="text/javascript" src="'.version_url($path_js).'"></script>'."\n";
+*/
+OpenVBX::addCSS('player/skin/jplayer-black-and-blue.css');
+
+//It would be nice to use a newer version of jquery but I cannot seem to overried the version that OpenVBX adds automatically
+//OpenVBX::addJS('js/jquery-1.7.1.min.js');
+
+//jplayer ABSOLUTELY has to go after the jquery script
+OpenVBX::addJS('player/2.7.0/jquery.jplayer.min.js');
+
 ?>
 <div class="vbx-content-main">
 
@@ -17,12 +43,15 @@ $recordings = $service->account->recordings;
 	<div class="vbx-content-container">
 		<div class="vbx-content-section">
 <table width="80%">
-<tr><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Agent(s)</th><th>URL</th></tr>
+<tr><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
 <?php
 foreach($recordings as $recording) {
 
-	$call = $service->account->calls->get($recording->call_sid);
 
+	//Need to find any details on child calls that the parent of the recording made.
+	//This tells us who the parent call ended up talking to
+	//If there are no child calls, then the recording was probably a voicemail...unless the parent call was an outbound call
+	//TODO: Check how recording works on outbound calls
 	$child_calls = $service->account->calls->getIterator(0, 50, array(    
 	'ParentCallSid' => $recording->call_sid,
 	'Status' => 'completed'));  
@@ -41,40 +70,41 @@ foreach($recordings as $recording) {
 		}
 	}
 	if ($has_calls) {
+		//Details on the recording's parent call
+		//This is put here to help reduce the api calls. It is only needed if there are child calls.
+		$call = $service->account->calls->get($recording->call_sid);
+
+		$users = array();
+		foreach($agents as $agent) {
+			if (strpos($agent->to,'client:') !== false) {
+				$user = OpenVBX::getUsers(array('id' => intval($agent->to_formatted)),1);
+				$users[$agent->to_formatted] = $user->full_name().' <small>(client call)</small>';
+			}
+		}
 ?>
 	<tr>
 		<td><?php echo date("F j, Y, g:i a",strtotime($recording->date_created)) ?></td>
 		<td><?php echo gmdate("H:i:s",$recording->duration%86400) ?></td>
 		<td><?php echo $call->from_formatted ?></td>
 		<td><?php echo $call->direction ?></td>
-		<td><?php foreach($agents as $agent) { echo $agent->to_formatted.'<br/>'; } ?></td>
-		<td><a href="http://api.twilio.com<?php echo $recording->uri ?>.mp3">MP3</a></td>
+		<td><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></td>
+		<td><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'lg') ?></td>
 	</tr>
 <?php
 	}
 }
 ?>
 </table>
-<?php /*			<div class="vbx-form">
-				<h3>Voicemail</h3>
-				<div class="voicemail-container">
-					<div class="voicemail-icon standard-icon"><span class="replace">Voicemail</span></div>
-					<div class="voicemail-label">Greeting</div>
-					<div class="voicemail-picker">
-						<?php
-							 $widget = new AudioSpeechPickerWidget(
-											'voicemail', 
-											$voicemail_mode, 
-											$voicemail_say, 
-											$voicemail_play, 
-											'user_id:'.$this->session->userdata('user_id')
-										);
-							echo $widget->render();
-						?>
-					</div>
-				</div><!-- .voicemail-container -->
-			</div> */?>
 		</div><!-- .vbx-content-section -->
 	</div><!-- .vbx-content-container -->
 	
 </div><!-- .vbx-content-main -->
+
+<?php
+/* TODO: Add caching?
+   TODO: Add styling.
+   TODO: Add pagination?
+   TODO: Add delete (option for admin only delete?).
+   TODO: Show a user's name instead of or in addition to phone number.
+   TODO: Cleanup code.
+   TODO: Take a nap.
