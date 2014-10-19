@@ -42,8 +42,8 @@ OpenVBX::addJS('player/2.7.0/jquery.jplayer.min.js');
 
 	<div class="vbx-content-container">
 		<div class="vbx-content-section">
-<table width="80%">
-<tr><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
+<table class="vbx-items-grid" border="0">
+<tr class="items-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
 <?php
 foreach($recordings as $recording) {
 
@@ -82,13 +82,13 @@ foreach($recordings as $recording) {
 			}
 		}
 ?>
-	<tr>
+	<tr class="message-row call-type">
 		<td><?php echo date("F j, Y, g:i a",strtotime($recording->date_created)) ?></td>
 		<td><?php echo gmdate("H:i:s",$recording->duration%86400) ?></td>
-		<td><?php echo $call->from_formatted ?></td>
+		<td class="message-caller"><span class="phone-number"><?php echo $call->from_formatted ?></span></td>
 		<td><?php echo $call->direction ?></td>
-		<td><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></td>
-		<td><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'lg') ?></td>
+		<td class="message-caller"><span class="phone-number"><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></span></td>
+		<td class="message-playback"><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'sm') ?></td>
 	</tr>
 <?php
 	}
