@@ -31,22 +31,20 @@ OpenVBX::addJS('player/2.7.0/jquery.jplayer.min.js');
 
 ?>
 <div class="vbx-content-main">
-
 	<div class="vbx-content-menu vbx-content-menu-top">
 		<h2 class="vbx-content-heading">Recorded Calls</h2>
 	</div><!-- .vbx-content-menu -->
-
-	<div class="voicemail-blank <?php echo (count($recordings) > 0) ? 'hide' : '' ?>">
-		<h2>There are no recorded calls.</h2>
-	</div>	
-
+<?php
+$have_recordings = false;
+foreach($recordings as $recording) {
+	if (!$have_recordings) {?>
 	<div class="vbx-content-container">
 		<div class="vbx-content-section">
-<table class="vbx-items-grid" border="0">
-<tr class="items-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
-<?php
-foreach($recordings as $recording) {
-
+			<table class="vbx-items-grid" border="0">
+				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
+<?
+		$have_recordings = true;
+	}
 
 	//Need to find any details on child calls that the parent of the recording made.
 	//This tells us who the parent call ended up talking to
@@ -82,29 +80,35 @@ foreach($recordings as $recording) {
 			}
 		}
 ?>
-	<tr class="message-row call-type">
-		<td><?php echo date("F j, Y, g:i a",strtotime($recording->date_created)) ?></td>
-		<td><?php echo gmdate("H:i:s",$recording->duration%86400) ?></td>
-		<td class="message-caller"><span class="phone-number"><?php echo $call->from_formatted ?></span></td>
-		<td><?php echo $call->direction ?></td>
-		<td class="message-caller"><span class="phone-number"><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></span></td>
-		<td class="message-playback"><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'sm') ?></td>
-	</tr>
+				<tr class="message-row recording-type">
+					<td class="recording-date"><?php echo date("F j, Y, g:i a",strtotime($recording->date_created)) ?></td>
+					<td class="recording-duration"><?php echo gmdate("H:i:s",$recording->duration%86400) ?></td>
+					<td class="message-caller recording-caller"><span class="phone-number"><?php echo $call->from_formatted ?></span></td>
+					<td class="recording-direction"><?php echo $call->direction ?></td>
+					<td class="message-caller recording-dialed"><span class="phone-number"><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></span></td>
+					<td class="recording-playback"><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'sm') ?></td>
+				</tr>
 <?php
 	}
 }
 ?>
-</table>
+<?php if ($have_recordings) {?>
+			</table>
 		</div><!-- .vbx-content-section -->
 	</div><!-- .vbx-content-container -->
-	
+<?php } else {?>
+	<div class="voicemail-blank recording-blank">
+		<h2>There are no recorded calls.</h2>
+		<p>When a call is recorded, they will show up here. You can listen to the message right in your web browser.
+	</div>
+<?php } ?>
 </div><!-- .vbx-content-main -->
-
 <?php
 /* TODO: Add caching?
-   TODO: Add styling.
+   TODO: Add styling. (almost done. Custom class names are in place. Using OpenVBX default names as fallbacks.)
    TODO: Add pagination?
    TODO: Add delete (option for admin only delete?).
-   TODO: Show a user's name instead of or in addition to phone number.
+   TODO: Show a user's name instead of or in addition to phone number (Currently done when "Spoke To" is a client instead of a phone number).
    TODO: Cleanup code.
+   TODO: Add transcripts? (hard to test this without spending $$)
    TODO: Take a nap.
