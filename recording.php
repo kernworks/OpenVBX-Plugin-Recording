@@ -37,14 +37,6 @@ OpenVBX::addJS('player/2.7.0/jquery.jplayer.min.js');
 <?php
 $have_recordings = false;
 foreach($recordings as $recording) {
-	if (!$have_recordings) {?>
-	<div class="vbx-content-container">
-		<div class="vbx-content-section">
-			<table class="vbx-items-grid" border="0">
-				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
-<?
-		$have_recordings = true;
-	}
 
 	//Need to find any details on child calls that the parent of the recording made.
 	//This tells us who the parent call ended up talking to
@@ -68,6 +60,16 @@ foreach($recordings as $recording) {
 		}
 	}
 	if ($has_calls) {
+		//We only know down here if the recording is not a voicemail
+		//Prints the table opening an header the first time it sees an actual call recording
+		if (!$have_recordings) {?>
+	<div class="vbx-content-container">
+		<div class="vbx-content-section">
+			<table class="vbx-items-grid" border="0">
+				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
+<?
+			$have_recordings = true;
+		}
 		//Details on the recording's parent call
 		//This is put here to help reduce the api calls. It is only needed if there are child calls.
 		$call = $service->account->calls->get($recording->call_sid);
