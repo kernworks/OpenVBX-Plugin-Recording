@@ -1,0 +1,8 @@
+	#vbx-calls .vbx-content-menu .pagination{
+		margin-right:20px
+	}
+
+	#calls-table th.call_id,
+	#calls-table th.call_detail,{
+		width:10%
+	}
