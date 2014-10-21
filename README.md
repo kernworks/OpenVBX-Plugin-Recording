@@ -9,13 +9,13 @@ Tested for use with OpenVBX 1.2.14
 It should also work with version 1.2.13.
 If you find any issues please open a [support request] [1].
 
-[1]: https://github.com/kernworks/OpenVBX-Plugin-Recording/archive/master.zip
+[1]: https://github.com/kernworks/OpenVBX-Plugin-Recording/issues
 
 # Installation
 
 [Download][2] the plugin and extract to /plugins
 
-[2]: https://github.com/kernworks/OpenVBX-Plugin-Recording/issues
+[2]: https://github.com/kernworks/OpenVBX-Plugin-Recording/archive/master.zip
 
 ## Usage
 
