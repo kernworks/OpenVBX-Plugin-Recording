@@ -1,26 +1,25 @@
 <?php
-//error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
-
 include_once('helpers.php');
 
 $ci =& get_instance();
 
+$cache_key = 'recording-plugin-recordings';
+$recordings_class = 'Services_Twilio_Rest_Recordings';
+
 $service = new Services_Twilio($ci->twilio_sid, $ci->twilio_token);
-$recordings = $service->account->recordings;
+
+//Check Cache and return it or get a new listing
+if ($cache = $ci->api_cache->get($cache_key, $recordings_class, $ci->tenant->id)) {
+	$recordings =& $cache;
+} else {
+	$recordings = $service->account->recordings;
+	//Set a 5 minute cache on recordings
+	$ci->api_cache->set($cache_key, $recordings, $recordings_class, $ci->tenant->id, 300);
+}
+
 $recording_host = $ci->vbx_settings->get('recording_host', $ci->tenant->id);
 $recording_host = (strlen($recording_host) <= 0) ? 'https://api.twilio.com' : 'http://'.$recording_host;
 
-/*$plugin = OpenVBX::$currentPlugin;
-$info = $plugin->getInfo();
-$path_jquery = base_url() . implode('/', array('plugins', $info['dir_name'], 'js/jquery-1.7.1.min.js'));
-$path_js = base_url() . implode('/', array('plugins', $info['dir_name'], 'player/jquery.jplayer.min.js'));
-
-//echo '<script type="text/javascript" src="'.version_url($path_jquery).'"></script>';
-//echo '<script type="text/javascript" src="'.version_url($path_js).'"></script>';
-
-//echo '<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>'."\n";
-//echo '<script type="text/javascript" src="'.version_url($path_js).'"></script>'."\n";
-*/
 OpenVBX::addCSS('player/skin/jplayer-black-and-blue.css');
 
 //It would be nice to use a newer version of jquery but I cannot seem to overried the version that OpenVBX adds automatically
@@ -66,7 +65,7 @@ foreach($recordings as $recording) {
 	<div class="vbx-content-container">
 		<div class="vbx-content-section">
 			<table class="vbx-items-grid" border="0">
-				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Spoke To</th><th>Recording</th></tr>
+				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Number Called</th><th>Spoke To</th><th>Recording</th></tr>
 <?
 			$have_recordings = true;
 		}
@@ -85,9 +84,10 @@ foreach($recordings as $recording) {
 				<tr class="message-row recording-type">
 					<td class="recording-date"><?php echo date("F j, Y, g:i a",strtotime($recording->date_created)) ?></td>
 					<td class="recording-duration"><?php echo gmdate("H:i:s",$recording->duration%86400) ?></td>
-					<td class="message-caller recording-caller"><span class="phone-number"><?php echo $call->from_formatted ?></span></td>
+					<td class="recording-caller"><span class="phone-number"><?php echo $call->from_formatted ?></span></td>
 					<td class="recording-direction"><?php echo $call->direction ?></td>
-					<td class="message-caller recording-dialed"><span class="phone-number"><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></span></td>
+					<td class="recording-dialed"><span class="phone-number"><?php echo $call->to_formatted ?></span></td>
+					<td class="recording-spoketo"><span class="phone-number"><?php foreach($agents as $agent) { echo (array_key_exists($agent->to_formatted,$users))? $users[$agent->to_formatted] : $agent->to_formatted.'<br/>'; } ?></span></td>
 					<td class="recording-playback"><?php echo generateFlashAudioPlayer($recording_host.$recording->uri, 'sm') ?></td>
 				</tr>
 <?php
@@ -101,16 +101,17 @@ foreach($recordings as $recording) {
 <?php } else {?>
 	<div class="voicemail-blank recording-blank">
 		<h2>There are no recorded calls.</h2>
-		<p>When a call is recorded, they will show up here. You can listen to the message right in your web browser.
+		<p>When a call is recorded, they will show up here. You can listen to the message right in your web browser.</p>
 	</div>
 <?php } ?>
 </div><!-- .vbx-content-main -->
 <?php
-/* TODO: Add caching?
-   TODO: Add styling. (almost done. Custom class names are in place. Using OpenVBX default names as fallbacks.)
-   TODO: Add pagination?
+/* DONE: Add caching. 5 minute cache on $recordings.
+   TODO: Should cache timeout be admin configurable? Shoud you give users option to load from api?
+   TODO: Add styling. Good enough for a release. (Custom class names are in place. Using OpenVBX default names as fallbacks.)
+   CLOSED: Add pagination: Not possible for now due to all recordings being returned (voicemails as well as call recordings). Caching is the best alternative.
    TODO: Add delete (option for admin only delete?).
    TODO: Show a user's name instead of or in addition to phone number (Currently done when "Spoke To" is a client instead of a phone number).
    TODO: Cleanup code.
-   TODO: Add transcripts? (hard to test this without spending $$)
+   CLOSE: Add transcripts: Transcribe options are only available on the <Record> verb. Call recording does not use this.
    TODO: Take a nap.
