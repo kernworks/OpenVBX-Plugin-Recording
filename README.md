@@ -39,9 +39,9 @@ This page allows you to listen to calls that were recorded.
 There are several things to be aware of when using this page:
 
 * Accounts with large numbers of recordings may take a while to completely load the page.
-  This is due to the limitations of the Twilip API.
-* Any new recordings will show up within 5 minutes of the call ending.
-* Outbound call recordings do not currently display.
+  This is due to the limitations of the Twilio API.
+* Any new recordings will show up within 5 minutes of the call completing.
+* Outbound call recordings do not currently display unless the flow they are sent to uses one of the dial applets to complete another call.
 
 ### Future Development
 
