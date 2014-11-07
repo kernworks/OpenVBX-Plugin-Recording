@@ -92,6 +92,12 @@ foreach($recordings as $recording) {
 				</tr>
 <?php
 	}
+
+	$dat = getrusage();
+	if ($dat["ru_utime.tv_sec"] >= (ini_get('max_execution_time') - 5)) {
+		OpenVBX::setNotificationMessage('PHP Max Execution reached. full list of recordings may not be displayed.');
+		break;
+	}
 }
 ?>
 <?php if ($have_recordings) {?>
@@ -114,4 +120,4 @@ foreach($recordings as $recording) {
    TODO: Show a user's name instead of or in addition to phone number (Currently done when "Spoke To" is a client instead of a phone number).
    TODO: Cleanup code.
    CLOSE: Add transcripts: Transcribe options are only available on the <Record> verb. Call recording does not use this.
-   TODO: Take a nap.
+*/
