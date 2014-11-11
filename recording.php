@@ -35,6 +35,7 @@ OpenVBX::addJS('player/2.7.0/jquery.jplayer.min.js');
 	</div><!-- .vbx-content-menu -->
 <?php
 $have_recordings = false;
+$max_minus = ini_get('max_execution_time') - 5;
 foreach($recordings as $recording) {
 
 	//Need to find any details on child calls that the parent of the recording made.
@@ -93,9 +94,10 @@ foreach($recordings as $recording) {
 <?php
 	}
 
+	//Don't excede the maximum execution time allowed.
 	$dat = getrusage();
-	if ($dat["ru_utime.tv_sec"] >= (ini_get('max_execution_time') - 5)) {
-		OpenVBX::setNotificationMessage('PHP Max Execution reached. full list of recordings may not be displayed.');
+	if ($dat["ru_utime.tv_sec"] >= $max_minus) {
+		OpenVBX::setNotificationMessage('PHP Max Execution reached. Full list of recordings may not be displayed.');
 		break;
 	}
 }
