@@ -67,7 +67,7 @@ foreach($recordings as $recording) {
 		<div class="vbx-content-section">
 			<table class="vbx-items-grid" border="0">
 				<tr class="items-head recording-head"><th>Date</th><th>Duration</th><th>Caller</th><th>Direction</th><th>Number Called</th><th>Spoke To</th><th>Recording</th></tr>
-<?
+<?php
 			$have_recordings = true;
 		}
 		//Details on the recording's parent call
@@ -102,11 +102,11 @@ foreach($recordings as $recording) {
 	}
 }
 ?>
-<?php if ($have_recordings) {?>
+<?php if ($have_recordings) { ?>
 			</table>
 		</div><!-- .vbx-content-section -->
 	</div><!-- .vbx-content-container -->
-<?php } else {?>
+<?php } else { ?>
 	<div class="voicemail-blank recording-blank">
 		<h2>There are no recorded calls.</h2>
 		<p>When a call is recorded, they will show up here. You can listen to the message right in your web browser.</p>
@@ -123,3 +123,4 @@ foreach($recordings as $recording) {
    TODO: Cleanup code.
    CLOSE: Add transcripts: Transcribe options are only available on the <Record> verb. Call recording does not use this.
 */
+?>
